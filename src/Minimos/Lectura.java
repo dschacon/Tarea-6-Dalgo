@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
 public class Lectura {
 
@@ -11,14 +12,16 @@ public class Lectura {
 	static ArrayList<String> arreglo=new ArrayList<String>();
 	static int ncolumnas=0;
 	static int nfilas=0;
+	
+	static Hashtable<String,Integer> costos = new Hashtable<>();
 
 	public static void main(String[] args) throws IOException {
-		BufferedReader bf = new BufferedReader(new FileReader("C:\\Users\\diegosebastian\\Documents\\Sebas\\Dalgo\\Tarea6\\distances5"
-				+ ".txt"));
-		
+		BufferedReader bf = new BufferedReader(new FileReader
+				("C:\\Users\\diegosebastian\\Documents\\Sebas\\Dalgo\\Tarea6\\distances5.txt"));
+
 		String sCadena;
-		
-		
+
+
 		while ((sCadena = bf.readLine())!=null) {
 			//System.out.println(sCadena);
 			String[] datos = sCadena.split("(?=\\s)");
@@ -29,14 +32,14 @@ public class Lectura {
 			arreglo.add("*");
 			nfilas++;
 		}
-		
-//		System.out.println("Filas: "+nfilas);
-//		System.out.println("Columnas: "+ncolumnas);
-		
+
+		//		System.out.println("Filas: "+nfilas);
+		//		System.out.println("Columnas: "+ncolumnas);
+
 		int lfila=0;
 		int lcolunma=0;
 		matriz = new int [nfilas+1][ncolumnas+1];
-		
+
 		for ( int tamaño=0;tamaño<arreglo.size(); tamaño++) {
 			String elemento = arreglo.get(tamaño);
 			if(!elemento.equals("*")){
@@ -47,45 +50,79 @@ public class Lectura {
 				lcolunma=0;
 			}
 		}
-		String fila="";
+		String fila=" ";
 		for (int i = 0; i < nfilas; i++) {
 			for (int j = 0; j < ncolumnas; j++) {
-				fila += matriz[i][j] +" ";
+				fila += matriz[i][j] +"   ";
 			}
 			System.out.println(fila);
-			fila="";
+			fila=" ";
 		}
+
+		long tinic= System.currentTimeMillis();
+		System.out.println("Inicio: "+tinic);
 		
+		
+
 		for (int i = 0; i < nfilas; i++) {
 			for (int j = 0; j < ncolumnas; j++) {
+				
 				if(i!=j){
-				System.out.println("Nodo: "+i+" a Nodo "+j+" costo minimo: " +Dijkstra(i,j ));
+					int[] p = new int[nfilas] ;
+					System.out.println("Nodo: "+i+" a Nodo "+j+" costo minimo: "+Dijkstra(i,j,p));
 				}
 			}
 		}
-		
-		
+		long tfin= System.currentTimeMillis();
+		System.out.println("Fin: "+(tfin-tinic));
+
+
+
 	}
 	/*
-	 * Recibe 2 parametros, el nodo origen y el número de nodos  
+	 * Recibe 3 parametros, el nodo inicio, nodo fin , nodos vistados 
 	 */
-	public static int Dijkstra (int inicio , int fin) {
-		int[] visitados = new int[nfilas] ;
-		int costo = 0; 
-		
-		if(matriz[inicio][fin] > 0 ){
+	public static int Dijkstra (int inicio , int fin , int[]pvisitados) {
+
+		//System.out.println("Inicio: "+inicio+" Fin: "+fin);
+		int[] adyacentes = new int[nfilas] ;
+		int costo = 999999999 ;
+		int[] visitados = pvisitados ;
+		visitados[inicio]=1;
+
+		int s = 0;
+
+		for (int i = 0; i < nfilas; i++) {
+			adyacentes[i] = matriz[inicio][i];
+		}
+
+		if(matriz[inicio][fin]>0 ){
 			costo=matriz[inicio][fin];
+
 		}
-	
-		for(int i = 0;i<visitados.length;i++){
-			if(inicio!= i && matriz[inicio][i]>0 && matriz[inicio][i]<costo){
-				int s = Dijkstra(i, fin);
-				if(s>0){
-					costo = matriz[inicio][i] + Dijkstra(i, fin);
+
+		Integer lc;
+		
+		for (int i = 0; i < adyacentes.length ; i++) {
+			if(i!=inicio && adyacentes[i]>0 && adyacentes[i]<costo && visitados[i]!=1){
+				lc = costos.get(i+"-"+fin);
+				if(lc==null){
+					System.out.println("Dijsktra de: "+i+"-"+fin);
+					visitados[i]=1;
+					s =  Dijkstra(i, fin, visitados);
+					costos.put(i+"-"+fin, s);
+				}else{
+					s =lc;
 				}
-				visitados[i]=1;
+				s+=adyacentes[i]; 
+				if(s<costo){
+					costo=s;
+				}
 			}
+
 		}
+		//System.out.println("Desmarque: "+inicio);
+		visitados[inicio]=0;
 		return costo;
 	}
 
