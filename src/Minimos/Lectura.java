@@ -12,9 +12,6 @@ public class Lectura {
 	static ArrayList<String> arreglo=new ArrayList<String>();
 	static int ncolumnas=0;
 	static int nfilas=0;
-	static ArrayList<Integer> ruta ;
-	static ArrayList<Integer> subruta ;
-	
 	static Hashtable<String,Integer> costos = new Hashtable<>();
 
 	public static void main(String[] args) throws IOException {
@@ -71,20 +68,17 @@ public class Lectura {
 				
 				if(i!=j){
 					int[] p = new int[nfilas] ;
-					ruta = new ArrayList<>();
-					subruta = new ArrayList<>();
 					System.out.println("Nodo: "+i+" a Nodo "+j+" costo minimo: "+Dijkstra(i,j,p));
 					if(true){
 						
 					}
-					ruta.add(0,i);
-					ruta.add(j);
-					System.out.println("Ruta: "+ruta.toString());
+
 				}
 			}
 		}
 		long tfin= System.currentTimeMillis();
 		System.out.println("Fin: "+(tfin-tinic));
+		
 
 
 
@@ -111,16 +105,14 @@ public class Lectura {
 		}
 
 		Integer lc;
-		
-		
+
+
 		for (int i = 0; i < adyacentes.length ; i++) {
-			//subruta = new ArrayList<>();
 			if(i!=inicio && adyacentes[i]>0 && adyacentes[i]<costo && visitados[i]!=1){
 				lc = costos.get(i+"-"+fin);
 				if(lc==null){
 					//System.out.println("Dijsktra de: "+i+"-"+fin);
 					visitados[i]=1;
-					subruta.add(i);
 					s =  Dijkstra(i, fin, visitados);
 					costos.put(i+"-"+fin, s);
 				}else{
@@ -129,13 +121,10 @@ public class Lectura {
 				s+=adyacentes[i]; 
 				if(s<costo){
 					costo=s;
-					ruta.clear();
-					ruta.addAll(subruta);
-				}else{
-					subruta.clear();
-					ruta.clear();
+
 				}
 			}
+
 
 		}
 		//System.out.println("Desmarque: "+inicio);
@@ -158,6 +147,11 @@ public class Lectura {
 		
 		return fin;
 	}
+
+	
+	
+	
+	
 	
 	
 	
