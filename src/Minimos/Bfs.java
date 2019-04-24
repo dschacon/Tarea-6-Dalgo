@@ -44,23 +44,34 @@ public class Bfs {
 		
 		
 		
+		int[] visitados = new int[tamaño];
+		 ArrayList<Integer> rta = bfs(visitados , 0);
+		 rta.add(0,0);
+		System.out.println(rta.toString());
+		
 	}
 	
 	
-	public ArrayList<Integer[]> bfs ( int [] visitados  , int inicio ){
+	public static ArrayList<Integer> bfs ( int [] visitados  , int inicio ){
+		
+		ArrayList<Integer> llocal = new ArrayList<>();
 		
 		int[] adyacentes = new int[ visitados.length ] ;
 		for (int i = 0; i < adyacentes.length; i++) {
 			adyacentes[i] = grafoNoDirigido[inicio][i];
 		}
+		visitados[inicio]=1;
 		
 		for (int i = 0; i < adyacentes.length; i++) {
-			if(adyacentes[i]==1){
-				
+			if(adyacentes[i]==1 && visitados[i]!=1){
+				visitados[i]=1;
+				llocal.add(i);
+				ArrayList<Integer> c = bfs(visitados, i);
+				llocal.addAll(c);
 			}
 		}
 		
-		return null;
+		return llocal;
 	}
 
 }
