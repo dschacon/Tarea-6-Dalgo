@@ -4,19 +4,38 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 public class Lectura {
 
-	static int[][] matriz;
+	static int [][] matriz;
 	static ArrayList<String> arreglo=new ArrayList<String>();
 	static int ncolumnas=0;
 	static int nfilas=0;
 	static Hashtable<String,Integer> costos = new Hashtable<>();
+	static int vertices;
+
+	static class Edge implements Comparable<Lectura.Edge>{
+		Integer vert1;
+		Integer vert2;
+		Integer edgeWt;
+		public Edge(int vert1, int vert2, int edgeWt) {
+			this.vert1 = vert1;
+			this.vert2 = vert2;
+			this.edgeWt = edgeWt;
+		}
+		public String toString() {
+			return "(" + vert1 + "--" + vert2 + ", " + edgeWt + ")";
+		}
+		public int compareTo(Edge other) {
+			return this.edgeWt.compareTo(other.edgeWt);
+		}
+	}
 
 	public static void main(String[] args) throws IOException {
 		BufferedReader bf = new BufferedReader(new FileReader
-				(".\\data\\distances5.txt"));
+				(args[0]));
 
 		String sCadena;
 
@@ -60,25 +79,36 @@ public class Lectura {
 
 		long tinic= System.currentTimeMillis();
 		System.out.println("Inicio: "+tinic);
-		
-		
+
+
 
 		for (int i = 0; i < nfilas; i++) {
 			for (int j = 0; j < ncolumnas; j++) {
-				
+
 				if(i!=j){
 					int[] p = new int[nfilas] ;
-					System.out.println("Nodo: "+i+" a Nodo "+j+" costo minimo: "+Dijkstra(i,j,p));
-					if(true){
-						
-					}
+					System.out.println("Dijkstra  Nodo: "+i+" a Nodo "+j+" costo minimo: "+Dijkstra(i,j,p));
+
+				}
+			}
+		}
+		
+		for (int i = 0; i < nfilas; i++) {
+			for (int j = 0; j < ncolumnas; j++) {
+
+				if(i!=j){
+					System.out.println("\n"+"BellmanFord");
+					bellmanFord(i, j);
 
 				}
 			}
 		}
 		long tfin= System.currentTimeMillis();
 		System.out.println("Fin: "+(tfin-tinic));
-		
+
+
+		System.out.println("\n"+"FloydWarschall");
+		FloydWarschall();
 
 
 
@@ -131,30 +161,104 @@ public class Lectura {
 		visitados[inicio]=0;
 		return costo;
 	}
-	
-	public static int bellmanFord  (int inicio , int fin , int[]pvisitados){
+
+	public static void bellmanFord  (int inicio , int fin){
 		
+		vertices = matriz.length;
+		int[] SSSP = new int[vertices];
+		int[] predecessor = new int[vertices];
+		ArrayList<Edge> adyacentes = new ArrayList<Edge>(vertices) ;
+		SSSP[inicio] = 0;
 		
-		
-		return fin;
-	}
-	
-	
-	
-	public static int FloydWarschall  (int inicio , int fin , int[]pvisitados){
-		
-		
-		
-		return fin;
+		for (int i = 0; i < vertices; i++) {
+			if(matriz[inicio][i] > 0) {
+				Edge edge = new Edge(inicio, i, matriz[inicio][i]);
+				adyacentes.add(edge);
+			}
+		}
+		/* runs |V|-1 times */
+		for (int i=0; i<vertices-1; i++) {
+			for (Edge edge: adyacentes) {
+				Integer vert1 = edge.vert1;
+				Integer vert2 = edge.vert2;
+
+				int weight = matriz[inicio][fin];
+				/* if distance is currently at infinity */
+				
+				if (weight >= SSSP[vert1]+weight) {
+					SSSP[vert2] = SSSP[vert1] + weight;
+					predecessor[vert2] = vert1;
+				}
+				else if (weight < 0) {
+					SSSP[vert1] = SSSP[vert2] + weight;
+					predecessor[vert1] = vert2;
+				}
+			}
+		}
+
+		System.out.println("Source vertex:     " + inicio);
+		System.out.println("Source vertex:     " + fin);
+		System.out.println("SSSP array:        " + Arrays.toString(SSSP));
+		System.out.println("Predecessor array: " + Arrays.toString(predecessor));
 	}
 
+
+
+	public static void FloydWarschall(){
+		
+		vertices = matriz.length;
+		int[][] APSP = new int [vertices][vertices] ;
+		int[][] successor = matriz;
+		ArrayList<Edge> adyacentes = new ArrayList<Edge>(nfilas) ;
+		
+		/* initializations */
+		for (int i=0; i<vertices; i++) {
+			APSP[i][i] = 0;
+		}
+		for (Edge edge: adyacentes) {
+			Integer vert1 = edge.vert1;
+			Integer vert2 = edge.vert2;
+			Integer edgeWt = edge.edgeWt;
+			APSP[vert1][vert2] = edgeWt;
+			successor[vert1][vert2] = vert2;
+		}
+		
+		/* bottom-up dynamic programming */
+		for (int k=0; k<vertices; k++) {
+			for (int i=0; i<vertices; i++) {
+				if (successor[i][k] == -1) {
+					continue;
+				}
+				for (int j=0; j<vertices; j++) {
+					if (APSP[i][k]==-1 || APSP[k][j]==-1) {
+						continue;
+					}
+					if ((APSP[i][j] == -1) ||	// if distance at infinity
+						(APSP[i][j] > APSP[i][k] + APSP[k][j])) {
+						APSP[i][j] = APSP[i][k] + APSP[k][j];
+					    successor[i][j] = successor[i][k];
+					}
+				}
+			}
+		}
+		
+		System.out.println("APSP matrix:");
+		imprimirMatriz(APSP);
+		System.out.println("Successor matrix:");
+		imprimirMatriz(successor);
 	
-	
-	
-	
-	
-	
-	
-	
+	}
+
+	public static void imprimirMatriz(int[][] aPSP) {
+		int filas = aPSP.length;
+		for (int i=0; i<filas; i++) {
+			System.out.println(Arrays.toString(aPSP[i]));
+		}
+	}
+
+
+
+
+
 }
 
